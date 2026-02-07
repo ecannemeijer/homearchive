@@ -1,3 +1,19 @@
+-- ============================================
+-- PRODUCTION DATABASE SCHEMA
+-- Subscription/Insurance Management System
+-- ============================================
+-- IMPORTANT: This schema creates a shared data model where all users
+-- access the same data. Individual user isolation is NOT implemented.
+-- All subscriptions, passwords, documents belong to system user (id=6).
+--
+-- Login credentials after import:
+--   Email: admin@example.com
+--   Password: admin123
+-- ============================================
+
+-- Disable foreign key checks for table creation
+SET FOREIGN_KEY_CHECKS=0;
+
 -- Tabel voor gebruikers
 CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -116,9 +132,28 @@ CREATE TABLE IF NOT EXISTS monthly_costs (
 -- ============================================
 
 -- System user for shared data (all subscriptions, passwords, etc. belong to this user)
-INSERT INTO users (id, name, email, password, is_admin) VALUES (6, 'System', 'system@example.com', '', 0) ON DUPLICATE KEY UPDATE id=6;
+-- CRITICAL: Must exist before any data tables can reference it (id=6)
+INSERT INTO users (id, name, email, password, is_admin) VALUES (6, 'System', 'system@example.com', '', 0) ON DUPLICATE KEY UPDATE name='System', is_admin=0;
 
 -- Default admin user
 -- Email: admin@example.com
--- Password: admin123 (bcrypt hash)
-INSERT INTO users (name, email, password, is_admin) VALUES ('Administrator', 'admin@example.com', '$2y$10$SHWiFzOIWMfkgfgJcXz93eptOE5e648shifWZrHHR94FC.JvUJQJy', 1) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id);
+-- Password: admin123 (bcrypt hash: $2y$10$SHWiFzOIWMfkgfgJcXz93eptOE5e648shifWZrHHR94FC.JvUJQJy)
+INSERT INTO users (name, email, password, is_admin) VALUES ('Administrator', 'admin@example.com', '$2y$10$SHWiFzOIWMfkgfgJcXz93eptOE5e648shifWZrHHR94FC.JvUJQJy', 1) ON DUPLICATE KEY UPDATE email='admin@example.com', is_admin=1;
+
+-- ============================================
+-- DEFAULT CATEGORIES
+-- ============================================
+
+INSERT INTO categories (user_id, name, color) VALUES 
+(6, 'Streaming', '#FF6B6B'),
+(6, 'Software', '#4ECDC4'),
+(6, 'Verzekering', '#45B7D1'),
+(6, 'Sport', '#FFA07A'),
+(6, 'Gezondheid', '#98D8C8'),
+(6, 'Overig', '#95A5A6')
+ON DUPLICATE KEY UPDATE color=VALUES(color);
+
+-- ============================================
+-- Re-enable foreign key checks
+-- ============================================
+SET FOREIGN_KEY_CHECKS=1;
