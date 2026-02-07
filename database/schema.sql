@@ -10,9 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- System user for shared data (id = 6, all data belongs to this user)
--- INSERT INTO users (id, name, email, password, is_admin) VALUES (6, 'System', 'system@local', '', 0);
-
 -- Tabel voor abonnementen en verzekeringen (shared data, all belong to system user id=6)
 CREATE TABLE IF NOT EXISTS subscriptions (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -113,3 +110,14 @@ CREATE TABLE IF NOT EXISTS monthly_costs (
     UNIQUE KEY unique_user_month (year, month),
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- DEFAULT USERS
+-- ============================================
+
+-- System user for shared data (all subscriptions, passwords, etc. belong to this user)
+INSERT INTO users (id, name, email, password, is_admin) VALUES (6, 'System', 'system@local', '', 0) ON DUPLICATE KEY UPDATE id=6;
+
+-- Default admin user
+-- Password: admin123 (bcrypt hash)
+INSERT INTO users (name, email, password, is_admin) VALUES ('Administrator', 'admin@local', '$2y$10$SHWiFzOIWMfkgfgJcXz93eptOE5e648shifWZrHHR94FC.JvUJQJy', 1) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id);
