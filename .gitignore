@@ -7,6 +7,8 @@ vendor/
 *.log
 uploads/*
 !uploads/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
 public/css/*
 public/js/*
 !public/css/.gitkeep
