@@ -1,0 +1,20 @@
+{
+    "name": "abonnementen/app",
+    "description": "Applicatie voor beheer van abonnementen en verzekeringen",
+    "require": {
+        "php": ">=7.4",
+        "vlucas/phpdotenv": "^5.4",
+        "ext-pdo": "*"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Config\\": "config/",
+            "Database\\": "database/"
+        },
+        "files": [
+            "config/helpers.php"
+        ]
+    }
+}

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: abonnementen_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: abonnementen
+      MYSQL_USER: abonnementen
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - app_network
+
+  php:
+    image: php:8.1-apache
+    container_name: abonnementen_app
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./app:/var/www/app
+      - ./config:/var/www/config
+      - ./database:/var/www/database
+      - ./uploads:/var/www/uploads
+    environment:
+      DB_HOST: mysql
+      DB_USER: abonnementen
+      DB_PASSWORD: password
+      DB_NAME: abonnementen
+    depends_on:
+      - mysql
+    networks:
+      - app_network
+    command: >
+      sh -c "a2enmod rewrite && 
+             a2enmod headers && 
+             docker-php-ext-install pdo pdo_mysql &&
+             apache2-foreground"
+
+volumes:
+  mysql_data:
+
+networks:
+  app_network:
+    driver: bridge
