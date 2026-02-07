@@ -38,23 +38,37 @@ class AuthController extends Controller
 
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
+        
+        // Debug logging
+        error_log('LOGIN_ATTEMPT: ' . $email . ' | Time: ' . date('Y-m-d H:i:s') . ' | Host: ' . $_SERVER['HTTP_HOST']);
 
         if (empty($email) || empty($password)) {
+            error_log('LOGIN_FAILED: Empty credentials for ' . $email);
             set_flash('error', 'Email en wachtwoord zijn verplicht');
             redirect('/login');
         }
 
         if (!is_valid_email($email)) {
+            error_log('LOGIN_FAILED: Invalid email format: ' . $email);
             set_flash('error', 'Ongeldig e-mailadres');
             redirect('/login');
         }
 
         if (!$this->user_model->verify_password($email, $password)) {
+            error_log('LOGIN_FAILED: Invalid password for ' . $email);
             set_flash('error', 'Ongeldige inloggegevens');
             redirect('/login');
         }
 
         $user = $this->user_model->by_email($email);
+        
+        if (!$user) {
+            error_log('LOGIN_FAILED: User not found after verification: ' . $email);
+            set_flash('error', 'Gebruiker niet gevonden');
+            redirect('/login');
+        }
+        
+        error_log('LOGIN_SUCCESS: ' . $email . ' (ID: ' . $user['id'] . ')');
         
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user'] = $user;
