@@ -192,6 +192,46 @@ INSERT INTO categories (user_id, name, color) VALUES
 ON DUPLICATE KEY UPDATE color=VALUES(color);
 
 -- ============================================
+-- EXAMPLE OFFERS DATA
+-- ============================================
+
+-- Streaming aanbiedingen
+INSERT INTO offers (provider, plan_name, price, frequency, category, description, url, conditions, is_active) VALUES
+('Netflix', 'Basis Abonnement', 7.99, 'monthly', 'Streaming', 'HD kwaliteit, 2 schermen tegelijk', 'https://www.netflix.com/nl/', 'Alleen voor nieuwe klanten', 1),
+('Disney+', 'Standaard', 8.99, 'monthly', 'Streaming', 'Alle Disney, Marvel, Star Wars content', 'https://www.disneyplus.com/', NULL, 1),
+('Amazon Prime Video', 'Prime Membership', 6.99, 'monthly', 'Streaming', 'Inclusief gratis verzending', 'https://www.primevideo.com/', NULL, 1),
+('Videoland', 'Plus pakket', 9.99, 'monthly', 'Streaming', 'Nederlandse content + films', 'https://www.videoland.com/', NULL, 1)
+ON DUPLICATE KEY UPDATE price=VALUES(price), is_active=VALUES(is_active);
+
+-- Software aanbiedingen
+INSERT INTO offers (provider, plan_name, price, frequency, category, description, url, conditions, is_active) VALUES
+('Microsoft 365', 'Persoonlijk', 69.00, 'yearly', 'Software', 'Word, Excel, PowerPoint, 1TB OneDrive', 'https://www.microsoft.com/nl-nl/microsoft-365', NULL, 1),
+('Adobe Creative Cloud', 'Fotografie', 11.99, 'monthly', 'Software', 'Photoshop + Lightroom', 'https://www.adobe.com/', NULL, 1),
+('Dropbox', 'Plus', 9.99, 'monthly', 'Software', '2TB cloud opslag', 'https://www.dropbox.com/', NULL, 1)
+ON DUPLICATE KEY UPDATE price=VALUES(price), is_active=VALUES(is_active);
+
+-- Verzekering aanbiedingen
+INSERT INTO offers (provider, plan_name, price, frequency, category, description, url, conditions, is_active) VALUES
+('OHRA', 'Zorgverzekering Basis', 119.00, 'monthly', 'Verzekering', 'Basisverzekering + gratis tandarts', 'https://www.ohra.nl/', 'Bij overstap voor 1 februari', 1),
+('Zilveren Kruis', 'Basis Verzekering', 125.00, 'monthly', 'Verzekering', 'Standaard dekking', 'https://www.zilverenkruis.nl/', NULL, 1),
+('VGZ', 'Goed Gedekt', 122.50, 'monthly', 'Verzekering', 'Basisverzekering met service', 'https://www.vgz.nl/', NULL, 1)
+ON DUPLICATE KEY UPDATE price=VALUES(price), is_active=VALUES(is_active);
+
+-- Sport aanbiedingen
+INSERT INTO offers (provider, plan_name, price, frequency, category, description, url, conditions, is_active) VALUES
+('Basic-Fit', 'Premium', 24.99, 'monthly', 'Sport', 'Onbeperkt naar alle vestigingen', 'https://www.basic-fit.com/', 'Alleen eerste maand korting', 1),
+('TrainMore', 'All-in', 29.95, 'monthly', 'Sport', 'Inclusief groepslessen en sauna', 'https://www.trainmore.com/', NULL, 1),
+('Fit For Free', 'Standaard', 19.95, 'monthly', 'Sport', 'Toegang tot alle clubs', 'https://www.fitforfree.nl/', NULL, 1)
+ON DUPLICATE KEY UPDATE price=VALUES(price), is_active=VALUES(is_active);
+
+-- Internet/Telecom aanbiedingen
+INSERT INTO offers (provider, plan_name, price, frequency, category, description, url, conditions, is_active) VALUES
+('Ziggo', 'Internet 500', 45.00, 'monthly', 'Overig', '500 Mbps download', 'https://www.ziggo.nl/', '12 maanden contract', 1),
+('KPN', 'Internet Compleet', 52.50, 'monthly', 'Overig', '500 Mbps + TV', 'https://www.kpn.com/', NULL, 1),
+('T-Mobile', 'Onbeperkt Internet', 25.00, 'monthly', 'Overig', 'Onbeperkt 4G/5G data', 'https://www.t-mobile.nl/', 'Sim-only', 1)
+ON DUPLICATE KEY UPDATE price=VALUES(price), is_active=VALUES(is_active);
+
+-- ============================================
 -- Re-enable foreign key checks
 -- ============================================
 SET FOREIGN_KEY_CHECKS=1;
