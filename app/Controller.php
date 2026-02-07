@@ -65,4 +65,18 @@ class Controller
             redirect('/login');
         }
     }
+    
+    /**
+     * Controleer admin rechten
+     */
+    public function admin_required()
+    {
+        $this->auth_required();
+        
+        $user = auth_user();
+        if (!$user || !$user['is_admin']) {
+            set_flash('error', 'Geen toegang - alleen voor administrators');
+            redirect('/dashboard');
+        }
+    }
 }
