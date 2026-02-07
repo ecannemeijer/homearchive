@@ -116,8 +116,9 @@ CREATE TABLE IF NOT EXISTS monthly_costs (
 -- ============================================
 
 -- System user for shared data (all subscriptions, passwords, etc. belong to this user)
-INSERT INTO users (id, name, email, password, is_admin) VALUES (6, 'System', 'system@local', '', 0) ON DUPLICATE KEY UPDATE id=6;
+INSERT INTO users (id, name, email, password, is_admin) VALUES (6, 'System', 'system@example.com', '', 0) ON DUPLICATE KEY UPDATE id=6;
 
 -- Default admin user
+-- Email: admin@example.com
 -- Password: admin123 (bcrypt hash)
-INSERT INTO users (name, email, password, is_admin) VALUES ('Administrator', 'admin@local', '$2y$10$SHWiFzOIWMfkgfgJcXz93eptOE5e648shifWZrHHR94FC.JvUJQJy', 1) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id);
+INSERT INTO users (name, email, password, is_admin) VALUES ('Administrator', 'admin@example.com', '$2y$10$SHWiFzOIWMfkgfgJcXz93eptOE5e648shifWZrHHR94FC.JvUJQJy', 1) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id);
