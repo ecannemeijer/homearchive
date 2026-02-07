@@ -28,23 +28,26 @@ spl_autoload_register(function ($class) {
 if (!defined('SESSION_STARTED_GUARD')) {
     if (session_status() === PHP_SESSION_NONE) {
         // Configure session to work across different domains/IPs
-        ini_set('session.cookie_httponly', '1');          // Prevent JavaScript access
-        ini_set('session.cookie_samesite', 'Lax');        // CSRF protection
-        ini_set('session.use_strict_mode', '1');          // Strict session ID mode
-        ini_set('session.cookie_lifetime', '86400');      // 24 hours
-        
-        // Allow session to work across IP and domain access
-        // Empty domain allows the cookie for any subdomain of the current domain
         session_set_cookie_params([
-            'lifetime' => 86400,
-            'path' => '/',
-            'domain' => '',  // Let PHP determine the domain automatically
-            'secure' => false,  // Set to true if using HTTPS in production
-            'httponly' => true,
-            'samesite' => 'Lax'
+            'lifetime' => 86400,        // 24 hours
+            'path' => '/',              // Available for entire site
+            'domain' => '',             // Empty = current domain (works for IP and domain)
+            'secure' => false,          // Set to true when using HTTPS
+            'httponly' => true,         // Prevent JavaScript access
+            'samesite' => 'Lax'         // CSRF protection
         ]);
         
+        // Use custom session name to avoid conflicts
+        session_name('HOMEARCHIVE_SESSION');
+        
         session_start();
+        
+        // Regenerate session ID on login to prevent fixation attacks
+        // But keep it stable once generated
+        if (!isset($_SESSION['initiated'])) {
+            session_regenerate_id(true);
+            $_SESSION['initiated'] = true;
+        }
     }
     define('SESSION_STARTED_GUARD', true);
 }
