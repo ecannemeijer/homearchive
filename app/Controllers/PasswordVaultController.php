@@ -20,14 +20,13 @@ class PasswordVaultController extends Controller
     public function index()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $search = $_GET['search'] ?? '';
         
         if (!empty($search)) {
-            $passwords = $this->password_model->search($user_id, $search);
+            $passwords = $this->password_model->search(null, $search);
         } else {
-            $passwords = $this->password_model->user_passwords($user_id);
+            $passwords = $this->password_model->user_passwords(null);
         }
 
         $flash = get_flash();
@@ -62,14 +61,13 @@ class PasswordVaultController extends Controller
     public function store()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             redirect('/password-vault');
         }
 
         $data = [
-            'user_id' => $user_id,
+            'user_id' => 0,
             'title' => $_POST['title'] ?? '',
             'username' => $_POST['username'] ?? '',
             'password_encrypted' => '',
@@ -130,9 +128,8 @@ class PasswordVaultController extends Controller
     public function edit($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $password = $this->password_model->find_for_user($id, $user_id);
+        $password = $this->password_model->find_for_user($id, null);
 
         if (!$password) {
             set_flash('error', 'Wachtwoord niet gevonden');
@@ -154,9 +151,8 @@ class PasswordVaultController extends Controller
     public function update($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $password = $this->password_model->find_for_user($id, $user_id);
+        $password = $this->password_model->find_for_user($id, null);
 
         if (!$password) {
             set_flash('error', 'Wachtwoord niet gevonden');
@@ -191,9 +187,8 @@ class PasswordVaultController extends Controller
     public function delete($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $password = $this->password_model->find_for_user($id, $user_id);
+        $password = $this->password_model->find_for_user($id, null);
 
         if (!$password) {
             set_flash('error', 'Wachtwoord niet gevonden');

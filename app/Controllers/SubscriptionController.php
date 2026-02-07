@@ -26,7 +26,6 @@ class SubscriptionController extends Controller
     public function index()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $page = max(1, (int)($_GET['page'] ?? 1));
         $limit = (int)($_GET['limit'] ?? 10);
@@ -43,7 +42,7 @@ class SubscriptionController extends Controller
         ];
 
         // Alle categorieën
-        $categories = $this->category_model->user_categories($user_id);
+        $categories = $this->category_model->all();
 
         // Filter op categorie als geselecteerd
         if (!empty($_GET['category'])) {
@@ -51,8 +50,8 @@ class SubscriptionController extends Controller
         }
 
         // Abonnementen
-        $subscriptions = $this->subscription_model->filtered($user_id, $filters);
-        $total = $this->subscription_model->count_filtered($user_id, $filters);
+        $subscriptions = $this->subscription_model->filtered(null, $filters);
+        $total = $this->subscription_model->count_filtered(null, $filters);
 
         $pages = ceil($total / $limit);
         $flash = get_flash();
@@ -75,9 +74,8 @@ class SubscriptionController extends Controller
     public function create()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $categories = $this->category_model->user_categories($user_id);
+        $categories = $this->category_model->all();
         $flash = get_flash();
 
         $this->render('subscriptions/create', [
@@ -92,14 +90,13 @@ class SubscriptionController extends Controller
     public function store()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             redirect('/subscriptions');
         }
 
         $data = [
-            'user_id' => $user_id,
+            'user_id' => 0,
             'name' => $_POST['name'] ?? '',
             'type' => $_POST['type'] ?? 'subscription',
             'category' => $_POST['category'] ?? '',
@@ -149,11 +146,10 @@ class SubscriptionController extends Controller
     public function show($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $subscription = $this->subscription_model->find($id);
 
-        if (!$subscription || $subscription['user_id'] !== $user_id) {
+        if (!$subscription) {
             set_flash('error', 'Abonnement niet gevonden');
             redirect('/subscriptions');
         }
@@ -178,11 +174,10 @@ class SubscriptionController extends Controller
     public function edit($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $subscription = $this->subscription_model->find($id);
 
-        if (!$subscription || $subscription['user_id'] !== $user_id) {
+        if (!$subscription) {
             set_flash('error', 'Abonnement niet gevonden');
             redirect('/subscriptions');
         }
@@ -207,7 +202,6 @@ class SubscriptionController extends Controller
     public function update($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             redirect('/subscriptions');
@@ -215,7 +209,7 @@ class SubscriptionController extends Controller
 
         $subscription = $this->subscription_model->find($id);
 
-        if (!$subscription || $subscription['user_id'] !== $user_id) {
+        if (!$subscription) {
             set_flash('error', 'Abonnement niet gevonden');
             redirect('/subscriptions');
         }
@@ -262,11 +256,10 @@ class SubscriptionController extends Controller
     public function delete($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $subscription = $this->subscription_model->find($id);
 
-        if (!$subscription || $subscription['user_id'] !== $user_id) {
+        if (!$subscription) {
             set_flash('error', 'Abonnement niet gevonden');
             redirect('/subscriptions');
         }

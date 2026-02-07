@@ -65,5 +65,17 @@ $router->get('/api/search', 'ApiController@search');
 $router->get('/api/cost-trend', 'ApiController@cost_trend');
 $router->get('/api/health', 'ApiController@health');
 
+// User Management (admin only)
+$router->get('/users', 'UserManagementController@index');
+$router->get('/users/create', 'UserManagementController@create');
+$router->post('/users', 'UserManagementController@store');
+$router->get('/users/{id}/edit', 'UserManagementController@edit');
+$router->post('/users/{id}', 'UserManagementController@update');
+$router->post('/users/{id}/delete', 'UserManagementController@delete');
+
+// Password & Account
+$router->get('/change-password', 'UserManagementController@change_password');
+$router->post('/change-password', 'UserManagementController@update_password');
+
 // Dispatch request
 $router->dispatch();

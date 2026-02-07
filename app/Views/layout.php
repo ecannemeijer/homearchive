@@ -11,6 +11,11 @@
         .mobile-menu-open { @apply block; }
         .mobile-menu-hidden { @apply hidden; }
         
+        /* User dropdown menu */
+        .user-dropdown.active {
+            @apply block;
+        }
+        
         /* Mobile: horizontal nav */
         @media (max-width: 767px) {
             .sidebar { 
@@ -48,12 +53,20 @@
                 <div class="flex items-center gap-4">
                     <?php if (is_logged_in()): ?>
                         <span class="text-gray-700 hidden sm:inline"><?php echo esc_html(auth_user()['name']); ?></span>
-                        <div class="relative group">
-                            <button class="text-gray-600 hover:text-gray-900">
+                        <div class="relative">
+                            <button id="user-menu-toggle" class="text-gray-600 hover:text-gray-900">
                                 <i class="fas fa-user-circle text-2xl"></i>
                             </button>
-                            <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-                                <a href="/logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-md">
+                            <div id="user-menu-dropdown" class="user-dropdown hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                                <a href="/change-password" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-key mr-2"></i> Wachtwoord wijzigen
+                                </a>
+                                <?php if (auth_user()['is_admin']): ?>
+                                <a href="/users" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-users mr-2"></i> Gebruikersbeheer
+                                </a>
+                                <?php endif; ?>
+                                <a href="/logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-b-md">
                                     <i class="fas fa-sign-out-alt mr-2"></i> Uitloggen
                                 </a>
                             </div>
@@ -122,7 +135,33 @@
     </div>
 
     <script>
-        // Navigation is now responsive - no need for toggle button
+        // User menu dropdown toggle
+        const userMenuToggle = document.getElementById('user-menu-toggle');
+        const userMenuDropdown = document.getElementById('user-menu-dropdown');
+
+        if (userMenuToggle) {
+            userMenuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+                userMenuDropdown.classList.toggle('active');
+            });
+
+            // Close menu when clicking a link
+            userMenuDropdown.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    userMenuDropdown.classList.add('hidden');
+                    userMenuDropdown.classList.remove('active');
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.relative')) {
+                    userMenuDropdown.classList.add('hidden');
+                    userMenuDropdown.classList.remove('active');
+                }
+            });
+        }
     </script>
 </body>
 </html>

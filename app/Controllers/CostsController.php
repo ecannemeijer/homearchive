@@ -23,22 +23,21 @@ class CostsController extends Controller
     public function overview()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $type_filter = $_GET['type'] ?? '';
 
         // Totale kosten
-        $monthly_total = $this->subscription_model->total_monthly_cost($user_id);
-        $yearly_total = $this->subscription_model->total_yearly_cost($user_id);
+        $monthly_total = $this->subscription_model->total_monthly_cost(null);
+        $yearly_total = $this->subscription_model->total_yearly_cost(null);
 
         // Kosten per type
-        $costs_by_type = $this->subscription_model->cost_by_type($user_id);
+        $costs_by_type = $this->subscription_model->cost_by_type(null);
 
         // Alle abonnementen voor grafiek
         $db = $this->subscription_model->db();
         $all_subs = $db->select(
-            'SELECT * FROM subscriptions WHERE user_id = :user_id AND is_active = 1 ORDER BY cost DESC',
-            ['user_id' => $user_id]
+            'SELECT * FROM subscriptions WHERE is_active = 1 ORDER BY cost DESC',
+            []
         );
 
         // Breker per type

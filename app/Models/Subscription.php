@@ -11,27 +11,29 @@ class Subscription extends Model
     /**
      * Alle abonnementen van gebruiker
      */
-    public function user_subscriptions($user_id, $status = 'all')
+    public function user_subscriptions($user_id = null, $status = 'all')
     {
-        $sql = 'SELECT * FROM ' . $this->table . ' WHERE user_id = :user_id';
+        $sql = 'SELECT * FROM ' . $this->table;
+        $params = [];
         
         if ($status !== 'all') {
             $is_active = ($status === 'active') ? 1 : 0;
-            $sql .= ' AND is_active = ' . $is_active;
+            $sql .= ' WHERE is_active = :active';
+            $params['active'] = $is_active;
         }
         
         $sql .= ' ORDER BY name ASC';
         
-        return $this->db->select($sql, ['user_id' => $user_id]);
+        return $this->db->select($sql, $params);
     }
 
     /**
      * Fil gering met search, sort, pagination
      */
-    public function filtered($user_id, $filters = [])
+    public function filtered($user_id = null, $filters = [])
     {
-        $sql = 'SELECT * FROM ' . $this->table . ' WHERE user_id = :user_id';
-        $params = ['user_id' => $user_id];
+        $sql = 'SELECT * FROM ' . $this->table . ' WHERE 1=1';
+        $params = [];
         
         // Filter op type
         if (!empty($filters['type'])) {
@@ -86,10 +88,10 @@ class Subscription extends Model
     /**
      * Count met filters
      */
-    public function count_filtered($user_id, $filters = [])
+    public function count_filtered($user_id = null, $filters = [])
     {
-        $sql = 'SELECT * FROM ' . $this->table . ' WHERE user_id = :user_id';
-        $params = ['user_id' => $user_id];
+        $sql = 'SELECT * FROM ' . $this->table . ' WHERE 1=1';
+        $params = [];
         
         if (!empty($filters['type'])) {
             $sql .= ' AND type = :type';
@@ -115,65 +117,65 @@ class Subscription extends Model
     /**
      * Items die bijna verlopen zijn
      */
-    public function expiring_soon($user_id, $days = 30)
+    public function expiring_soon($user_id = null, $days = 30)
     {
         $sql = 'SELECT * FROM ' . $this->table . 
-               ' WHERE user_id = :user_id AND is_active = 1' .
+               ' WHERE is_active = 1' .
                ' AND is_monthly_cancelable = 0' .
                ' AND end_date IS NOT NULL AND end_date != "0000-00-00"' .
                ' AND DATEDIFF(end_date, CURDATE()) BETWEEN 0 AND :days ' .
                ' ORDER BY end_date ASC';
         
-        return $this->db->select($sql, ['user_id' => $user_id, 'days' => $days]);
+        return $this->db->select($sql, ['days' => $days]);
     }
 
     /**
      * Totaal maandelijks kosten
      */
-    public function total_monthly_cost($user_id, $include_yearly = true)
+    public function total_monthly_cost($user_id = null, $include_yearly = true)
     {
         $sql = 'SELECT SUM(cost) as total FROM ' . $this->table . 
-               ' WHERE user_id = :user_id AND is_active = 1';
+               ' WHERE is_active = 1';
         
         if (!$include_yearly) {
             $sql .= ' AND frequency = "monthly"';
         }
         
-        $result = $this->db->selectOne($sql, ['user_id' => $user_id]);
+        $result = $this->db->selectOne($sql, []);
         return $result['total'] ?? 0;
     }
 
     /**
      * Totaal jaarlijks kosten
      */
-    public function total_yearly_cost($user_id)
+    public function total_yearly_cost($user_id = null)
     {
         $sql = 'SELECT SUM(CASE 
                     WHEN frequency = "monthly" THEN cost * 12
                     WHEN frequency = "yearly" THEN cost
                     ELSE 0
                 END) as total FROM ' . $this->table . 
-               ' WHERE user_id = :user_id AND is_active = 1';
+               ' WHERE is_active = 1';
         
-        $result = $this->db->selectOne($sql, ['user_id' => $user_id]);
+        $result = $this->db->selectOne($sql, []);
         return $result['total'] ?? 0;
     }
 
     /**
      * Kosten per type
      */
-    public function cost_by_type($user_id)
+    public function cost_by_type($user_id = null)
     {
         $sql = 'SELECT type, SUM(cost) as total, COUNT(*) as count FROM ' . $this->table . 
-               ' WHERE user_id = :user_id AND is_active = 1 GROUP BY type';
+               ' WHERE is_active = 1 GROUP BY type';
         
-        return $this->db->select($sql, ['user_id' => $user_id]);
+        return $this->db->select($sql, []);
     }
 
     /**
      * Maandelijkse kosten trend
      */
-    public function monthly_trend($user_id, $months = 12)
+    public function monthly_trend($user_id = null, $months = 12)
     {
         $sql = 'SELECT 
                     DATE_FORMAT(CURDATE(), "%Y-%m") as month,
@@ -183,11 +185,11 @@ class Subscription extends Model
                         ELSE 0
                     END) as total
                 FROM ' . $this->table . 
-               ' WHERE user_id = :user_id AND is_active = 1
+               ' WHERE is_active = 1
                 GROUP BY YEAR(CURDATE()), MONTH(CURDATE())
                 ORDER BY month DESC
                 LIMIT ' . (int)$months;
         
-        return $this->db->select($sql, ['user_id' => $user_id]);
+        return $this->db->select($sql, []);
     }
 }

@@ -23,12 +23,11 @@ class ApiController extends Controller
     public function stats()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $monthly_total = $this->subscription_model->total_monthly_cost($user_id);
-        $yearly_total = $this->subscription_model->total_yearly_cost($user_id);
-        $costs_by_type = $this->subscription_model->cost_by_type($user_id);
-        $expiring = $this->subscription_model->expiring_soon($user_id);
+        $monthly_total = $this->subscription_model->total_monthly_cost(null);
+        $yearly_total = $this->subscription_model->total_yearly_cost(null);
+        $costs_by_type = $this->subscription_model->cost_by_type(null);
+        $expiring = $this->subscription_model->expiring_soon(null);
 
         $this->json([
             'monthly_total' => $monthly_total,
@@ -73,12 +72,11 @@ class ApiController extends Controller
     public function check_expiring()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $days = (int)($_GET['days'] ?? 30);
-        $this->notification->check_expiring($user_id, $days);
+        $this->notification->check_expiring(null, $days);
 
-        $expiring = $this->subscription_model->expiring_soon($user_id, $days);
+        $expiring = $this->subscription_model->expiring_soon(null, $days);
 
         $this->json([
             'success' => true,
@@ -93,7 +91,6 @@ class ApiController extends Controller
     public function search()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $query = trim($_GET['q'] ?? '');
 
@@ -107,17 +104,17 @@ class ApiController extends Controller
         // Search subscriptions
         $subs = $db->select(
             'SELECT id, name, cost, type FROM subscriptions 
-             WHERE user_id = :user_id AND (name LIKE :search OR notes LIKE :search)
+             WHERE (name LIKE :search OR notes LIKE :search)
              LIMIT 10',
-            ['user_id' => $user_id, 'search' => $search]
+            ['search' => $search]
         );
 
         // Search passwords
         $pwds = $db->select(
             'SELECT id, title, username, website_url FROM passwords
-             WHERE user_id = :user_id AND (title LIKE :search OR username LIKE :search)
+             WHERE (title LIKE :search OR username LIKE :search)
              LIMIT 5',
-            ['user_id' => $user_id, 'search' => $search]
+            ['search' => $search]
         );
 
         $results = [];
@@ -151,7 +148,6 @@ class ApiController extends Controller
     public function cost_trend()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         $months = (int)($_GET['months'] ?? 12);
         $months = min($months, 24);
@@ -162,7 +158,7 @@ class ApiController extends Controller
             $month_key = $date->format('Y-m');
 
             // Approximate calculation
-            $monthly_cost = $this->subscription_model->total_monthly_cost($user_id);
+            $monthly_cost = $this->subscription_model->total_monthly_cost(null);
             
             $trend[] = [
                 'month' => $month_key,

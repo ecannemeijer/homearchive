@@ -67,14 +67,13 @@
             <!-- Divider -->
             <div class="flex items-center my-6">
                 <div class="flex-1 border-t border-gray-300"></div>
-                <div class="px-3 text-gray-500 text-sm">of</div>
+                <div class="px-3 text-gray-500 text-sm">Gebruikersbeheer</div>
                 <div class="flex-1 border-t border-gray-300"></div>
             </div>
 
-            <!-- Signup link -->
+            <!-- Admin note -->
             <p class="text-center text-gray-600 text-sm">
-                Nog geen account?
-                <a href="/register" class="text-blue-600 font-semibold hover:text-blue-700">Registreer hier</a>
+                Neem contact op met de beheerder voor een account
             </p>
         </div>
     </div>

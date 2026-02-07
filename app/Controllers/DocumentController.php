@@ -23,7 +23,6 @@ class DocumentController extends Controller
     public function upload()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->json(['error' => 'Ongeldige request'], 400);
@@ -31,9 +30,9 @@ class DocumentController extends Controller
 
         $sub_id = (int)($_POST['subscription_id'] ?? 0);
 
-        // Check of subscription van gebruiker is
+        // Check of subscription bestaat
         $subscription = $this->subscription_model->find($sub_id);
-        if (!$subscription || $subscription['user_id'] !== $user_id) {
+        if (!$subscription) {
             $this->json(['error' => 'Abonnement niet gevonden'], 403);
         }
 
@@ -65,7 +64,7 @@ class DocumentController extends Controller
         // Opslaan in database
         $data = [
             'subscription_id' => $sub_id,
-            'user_id' => $user_id,
+            'user_id' => 0,
             'filename' => $unique_name,
             'original_filename' => $_FILES['file']['name'],
             'file_type' => strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION)),
@@ -92,9 +91,8 @@ class DocumentController extends Controller
     public function download($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $document = $this->document_model->find_for_user($id, $user_id);
+        $document = $this->document_model->find_for_user($id);
 
         if (!$document) {
             set_flash('error', 'Document niet gevonden');
@@ -118,9 +116,8 @@ class DocumentController extends Controller
     public function delete($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $document = $this->document_model->find_for_user($id, $user_id);
+        $document = $this->document_model->find_for_user($id);
 
         if (!$document) {
             $this->json(['error' => 'Document niet gevonden'], 404);

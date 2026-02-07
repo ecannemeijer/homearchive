@@ -11,33 +11,33 @@ class Password extends Model
     /**
      * Alle wachtwoorden van gebruiker
      */
-    public function user_passwords($user_id)
+    public function user_passwords($user_id = null)
     {
         $sql = 'SELECT id, title, username, website_url, tags, created_at FROM ' . $this->table . 
-               ' WHERE user_id = :user_id ORDER BY title ASC';
+               ' ORDER BY title ASC';
         
-        return $this->db->select($sql, ['user_id' => $user_id]);
+        return $this->db->select($sql, []);
     }
 
     /**
      * Vind wachtwoord met ID
      */
-    public function find_for_user($id, $user_id)
+    public function find_for_user($id, $user_id = null)
     {
-        $sql = 'SELECT * FROM ' . $this->table . ' WHERE id = :id AND user_id = :user_id';
-        return $this->db->selectOne($sql, ['id' => $id, 'user_id' => $user_id]);
+        $sql = 'SELECT * FROM ' . $this->table . ' WHERE id = :id';
+        return $this->db->selectOne($sql, ['id' => $id]);
     }
 
     /**
      * Zoeken naar wachtwoord
      */
-    public function search($user_id, $query)
+    public function search($user_id = null, $query)
     {
         $search = '%' . $query . '%';
         $sql = 'SELECT id, title, username, website_url, tags FROM ' . $this->table . 
-               ' WHERE user_id = :user_id AND (title LIKE :search OR username LIKE :search OR website_url LIKE :search)' .
+               ' WHERE (title LIKE :search OR username LIKE :search OR website_url LIKE :search)' .
                ' ORDER BY title ASC';
         
-        return $this->db->select($sql, ['user_id' => $user_id, 'search' => $search]);
+        return $this->db->select($sql, ['search' => $search]);
     }
 }

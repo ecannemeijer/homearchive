@@ -23,27 +23,26 @@ class DashboardController extends Controller
     public function index()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         // Bijna verlopen items
-        $expiring = $this->subscription_model->expiring_soon($user_id);
+        $expiring = $this->subscription_model->expiring_soon(null);
 
         // Totale kosten
-        $monthly_total = $this->subscription_model->total_monthly_cost($user_id);
-        $yearly_total = $this->subscription_model->total_yearly_cost($user_id);
+        $monthly_total = $this->subscription_model->total_monthly_cost(null);
+        $yearly_total = $this->subscription_model->total_yearly_cost(null);
 
         // Kosten per type
-        $costs_by_type = $this->subscription_model->cost_by_type($user_id);
+        $costs_by_type = $this->subscription_model->cost_by_type(null);
 
         // Aantal abonnementen
-        $all_subs = $this->subscription_model->user_subscriptions($user_id);
-        $active_subs = $this->subscription_model->user_subscriptions($user_id, 'active');
+        $all_subs = $this->subscription_model->user_subscriptions(null);
+        $active_subs = $this->subscription_model->user_subscriptions(null, 'active');
 
         // Recente items
         $db = $this->subscription_model->db();
         $recent = $db->select(
-            'SELECT * FROM subscriptions WHERE user_id = :user_id AND is_active = 1 ORDER BY created_at DESC LIMIT 5',
-            ['user_id' => $user_id]
+            'SELECT * FROM subscriptions WHERE is_active = 1 ORDER BY created_at DESC LIMIT 5',
+            []
         );
 
         $flash = get_flash();

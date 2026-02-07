@@ -20,9 +20,8 @@ class CategoryController extends Controller
     public function index()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $categories = $this->category_model->user_categories($user_id);
+        $categories = $this->category_model->user_categories(null);
         $flash = get_flash();
 
         $this->render('categories/index', [
@@ -37,7 +36,6 @@ class CategoryController extends Controller
     public function store()
     {
         $this->auth_required();
-        $user_id = auth_id();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->json(['error' => 'Ongeldige request'], 400);
@@ -51,7 +49,7 @@ class CategoryController extends Controller
         }
 
         $data = [
-            'user_id' => $user_id,
+            'user_id' => 0,
             'name' => $name,
             'color' => $color
         ];
@@ -75,9 +73,8 @@ class CategoryController extends Controller
     public function update($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $category = $this->category_model->find_for_user($id, $user_id);
+        $category = $this->category_model->find($id);
         if (!$category) {
             $this->json(['error' => 'Categorie niet gevonden'], 404);
         }
@@ -108,9 +105,8 @@ class CategoryController extends Controller
     public function delete($id)
     {
         $this->auth_required();
-        $user_id = auth_id();
 
-        $category = $this->category_model->find_for_user($id, $user_id);
+        $category = $this->category_model->find($id);
         if (!$category) {
             $this->json(['error' => 'Categorie niet gevonden'], 404);
         }
