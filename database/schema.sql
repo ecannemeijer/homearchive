@@ -127,6 +127,44 @@ CREATE TABLE IF NOT EXISTS monthly_costs (
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabel voor prijsvergelijking aanbiedingen
+CREATE TABLE IF NOT EXISTS offers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    provider VARCHAR(191) NOT NULL COMMENT 'Aanbieder naam (bijv. Ziggo, VGZ)',
+    plan_name VARCHAR(255) NOT NULL COMMENT 'Plan/product naam',
+    price DECIMAL(10, 2) NOT NULL COMMENT 'Prijs',
+    frequency ENUM('monthly', 'yearly') NOT NULL DEFAULT 'monthly',
+    category VARCHAR(100) DEFAULT NULL COMMENT 'Categorie (streaming, internet, verzekering, etc.)',
+    description TEXT DEFAULT NULL COMMENT 'Beschrijving van het aanbod',
+    url VARCHAR(1024) DEFAULT NULL COMMENT 'Link naar aanbieding',
+    features JSON DEFAULT NULL COMMENT 'Extra features (snelheid, dekking, etc.)',
+    conditions TEXT DEFAULT NULL COMMENT 'Voorwaarden',
+    is_active TINYINT DEFAULT 1 COMMENT 'Actief aanbod?',
+    last_checked DATETIME DEFAULT NULL COMMENT 'Laatste keer gecontroleerd',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_category (category),
+    INDEX idx_active (is_active),
+    INDEX idx_price (price)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabel voor besparingsaanbevelingen
+CREATE TABLE IF NOT EXISTS savings_recommendations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    subscription_id INT NOT NULL,
+    offer_id INT NOT NULL,
+    monthly_savings DECIMAL(10, 2) NOT NULL,
+    yearly_savings DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected', 'expired') DEFAULT 'pending',
+    notes TEXT DEFAULT NULL,
+    recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    responded_at DATETIME DEFAULT NULL,
+    FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE,
+    FOREIGN KEY (offer_id) REFERENCES offers(id) ON DELETE CASCADE,
+    INDEX idx_subscription (subscription_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================
 -- DEFAULT USERS
 -- ============================================

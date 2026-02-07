@@ -68,6 +68,31 @@
                 </div>
             </div>
 
+            <!-- Prijsvergelijking -->
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow p-6 border border-green-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-green-300">
+                    <i class="fas fa-search-dollar text-green-600 mr-2"></i> Bespaar Geld
+                </h2>
+                <p class="text-gray-700 mb-4">
+                    Zoek naar goedkopere alternatieven en bespaar op je maandelijkse kosten.
+                </p>
+                <button id="compare-btn" class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold shadow-md">
+                    <i class="fas fa-search mr-2"></i> Zoek Goedkopere Alternatieven
+                </button>
+                
+                <div id="compare-loading" class="hidden mt-4">
+                    <div class="flex items-center justify-center text-gray-600 py-4">
+                        <svg class="animate-spin h-6 w-6 mr-3 text-green-600" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Bezig met zoeken naar alternatieven...</span>
+                    </div>
+                </div>
+                
+                <div id="compare-results" class="hidden mt-4"></div>
+            </div>
+
             <!-- Datums -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
@@ -273,5 +298,119 @@
                 alert('Fout: ' + (data.error || 'Upload mislukt'));
             }
         });
+    });
+    
+    // Price comparison functionality
+    document.getElementById('compare-btn')?.addEventListener('click', async function() {
+        const btn = this;
+        const loading = document.getElementById('compare-loading');
+        const results = document.getElementById('compare-results');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Aan het zoeken...';
+        loading.classList.remove('hidden');
+        results.classList.add('hidden');
+        
+        try {
+            const res = await fetch('/subscriptions/<?= $subscription['id'] ?>/compare', {
+                credentials: 'same-origin'
+            });
+            const data = await res.json();
+            
+            loading.classList.add('hidden');
+            results.classList.remove('hidden');
+            
+            if (!data.alternatives || data.alternatives.length === 0) {
+                results.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 text-xl mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-blue-900">Geen goedkopere alternatieven</p>
+                                <p class="text-blue-800 text-sm mt-1">Je huidige abonnement is al competitief geprijsd!</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                let html = `
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 text-2xl mr-3 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-green-900 text-lg">${data.total_alternatives} goedkopere alternatieven gevonden!</h4>
+                                <p class="text-green-800 mt-1">Je kunt tot <strong>€${data.best_saving.yearly_savings}</strong> per jaar besparen.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                `;
+                
+                data.alternatives.forEach((alt, index) => {
+                    html += `
+                        <div class="bg-white border-2 ${index === 0 ? 'border-green-400' : 'border-gray-200'} rounded-lg p-4 hover:shadow-lg transition">
+                            ${index === 0 ? '<div class="inline-block bg-green-600 text-white text-xs font-bold px-2 py-1 rounded mb-2">BESTE KEUZE</div>' : ''}
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-lg text-gray-900">${alt.provider}</h5>
+                                    <p class="text-gray-700 font-medium">${alt.plan_name}</p>
+                                    ${alt.description ? `<p class="text-gray-600 text-sm mt-2">${alt.description}</p>` : ''}
+                                    
+                                    <div class="mt-3 flex flex-wrap gap-4 text-sm">
+                                        <div class="bg-blue-50 px-3 py-1 rounded">
+                                            <span class="text-gray-600">Prijs:</span>
+                                            <span class="font-bold text-blue-900">€${alt.monthly_price}/maand</span>
+                                        </div>
+                                        <div class="bg-green-50 px-3 py-1 rounded">
+                                            <span class="text-gray-600">Besparing:</span>
+                                            <span class="font-bold text-green-700">€${alt.monthly_savings}/maand</span>
+                                        </div>
+                                        <div class="bg-green-100 px-3 py-1 rounded">
+                                            <span class="font-bold text-green-800">${alt.savings_percentage}% goedkoper</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-2 text-xs text-gray-600">
+                                        <i class="fas fa-calendar-alt mr-1"></i> Jaarlijkse besparing: <strong class="text-green-700">€${alt.yearly_savings}</strong>
+                                    </div>
+                                    
+                                    ${alt.conditions ? `<p class="text-xs text-gray-500 mt-2 italic"><i class="fas fa-info-circle mr-1"></i> ${alt.conditions}</p>` : ''}
+                                </div>
+                                
+                                ${alt.url ? `
+                                <div class="ml-4">
+                                    <a href="${alt.url}" target="_blank" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                        Bekijk aanbieding <i class="fas fa-external-link-alt ml-1"></i>
+                                    </a>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                results.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Comparison error:', error);
+            loading.classList.add('hidden');
+            results.classList.remove('hidden');
+            results.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-3 mt-1"></i>
+                        <div>
+                            <p class="font-semibold text-red-900">Fout bij ophalen alternatieven</p>
+                            <p class="text-red-800 text-sm mt-1">Probeer het later opnieuw.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search mr-2"></i> Zoek Opnieuw';
+        }
     });
 </script>

@@ -77,5 +77,21 @@ $router->post('/users/{id}/delete', 'UserManagementController@delete');
 $router->get('/change-password', 'UserManagementController@change_password');
 $router->post('/change-password', 'UserManagementController@update_password');
 
+// Price Comparison & Savings
+$router->get('/subscriptions/{id}/compare', 'ComparisonController@compare');
+$router->get('/compare/all', 'ComparisonController@compareAll');
+$router->get('/savings', 'ComparisonController@savingsOverview');
+$router->post('/recommendations/{id}/accept', 'ComparisonController@accept');
+$router->post('/recommendations/{id}/reject', 'ComparisonController@reject');
+
+// Offer Management (admin only)
+$router->get('/offers', 'OfferController@index');
+$router->get('/offers/create', 'OfferController@create');
+$router->post('/offers', 'OfferController@store');
+$router->get('/offers/{id}', 'OfferController@show');
+$router->get('/offers/{id}/edit', 'OfferController@edit');
+$router->post('/offers/{id}', 'OfferController@update');
+$router->post('/offers/{id}/delete', 'OfferController@delete');
+
 // Dispatch request
 $router->dispatch();

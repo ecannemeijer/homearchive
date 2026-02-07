@@ -103,6 +103,12 @@
                     <a href="/categories" class="flex-1 md:flex-none block px-3 md:px-4 py-2 rounded-lg hover:bg-gray-700 text-sm md:text-base text-center md:text-left <?php echo strpos($_SERVER['REQUEST_URI'], '/categories') !== false ? 'sidebar-active' : ''; ?>">
                         <i class="fas fa-tags mr-0 md:mr-3 w-5 md:w-auto"></i> <span class="hidden md:inline">Categorieën</span>
                     </a>
+                    
+                    <?php if (auth_user()['is_admin']): ?>
+                    <a href="/offers" class="flex-1 md:flex-none block px-3 md:px-4 py-2 rounded-lg hover:bg-gray-700 text-sm md:text-base text-center md:text-left <?php echo strpos($_SERVER['REQUEST_URI'], '/offers') !== false ? 'sidebar-active' : ''; ?>">
+                        <i class="fas fa-tag mr-0 md:mr-3 w-5 md:w-auto"></i> <span class="hidden md:inline">Aanbiedingen</span>
+                    </a>
+                    <?php endif; ?>
                 </nav>
             </div>
         </aside>
