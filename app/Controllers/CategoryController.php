@@ -49,7 +49,7 @@ class CategoryController extends Controller
         }
 
         $data = [
-            'user_id' => 0,
+            'user_id' => 6,
             'name' => $name,
             'color' => $color
         ];

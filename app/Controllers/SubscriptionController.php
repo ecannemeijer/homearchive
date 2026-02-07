@@ -96,7 +96,7 @@ class SubscriptionController extends Controller
         }
 
         $data = [
-            'user_id' => 0,
+            'user_id' => 6,
             'name' => $_POST['name'] ?? '',
             'type' => $_POST['type'] ?? 'subscription',
             'category' => $_POST['category'] ?? '',

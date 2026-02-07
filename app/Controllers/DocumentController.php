@@ -64,7 +64,7 @@ class DocumentController extends Controller
         // Opslaan in database
         $data = [
             'subscription_id' => $sub_id,
-            'user_id' => 0,
+            'user_id' => 6,
             'filename' => $unique_name,
             'original_filename' => $_FILES['file']['name'],
             'file_type' => strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION)),

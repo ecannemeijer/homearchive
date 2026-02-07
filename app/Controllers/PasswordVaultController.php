@@ -67,7 +67,7 @@ class PasswordVaultController extends Controller
         }
 
         $data = [
-            'user_id' => 0,
+            'user_id' => 6,
             'title' => $_POST['title'] ?? '',
             'username' => $_POST['username'] ?? '',
             'password_encrypted' => '',
