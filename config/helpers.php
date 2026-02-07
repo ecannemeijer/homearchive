@@ -24,9 +24,26 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Start sessie als deze nog niet gestart is - moet voor output
+// Session configuration - must be set BEFORE session_start()
 if (!defined('SESSION_STARTED_GUARD')) {
     if (session_status() === PHP_SESSION_NONE) {
+        // Configure session to work across different domains/IPs
+        ini_set('session.cookie_httponly', '1');          // Prevent JavaScript access
+        ini_set('session.cookie_samesite', 'Lax');        // CSRF protection
+        ini_set('session.use_strict_mode', '1');          // Strict session ID mode
+        ini_set('session.cookie_lifetime', '86400');      // 24 hours
+        
+        // Allow session to work across IP and domain access
+        // Empty domain allows the cookie for any subdomain of the current domain
+        session_set_cookie_params([
+            'lifetime' => 86400,
+            'path' => '/',
+            'domain' => '',  // Let PHP determine the domain automatically
+            'secure' => false,  // Set to true if using HTTPS in production
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        
         session_start();
     }
     define('SESSION_STARTED_GUARD', true);
