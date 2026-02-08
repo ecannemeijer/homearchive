@@ -33,10 +33,11 @@ class Offer extends Model
             return [];
         }
         
-        $offers = $this->forCategory($category);
         $alternatives = [];
         
-        foreach ($offers as $offer) {
+        // Haal interne aanbiedingen op
+        $internalOffers = $this->forCategory($category);
+        foreach ($internalOffers as $offer) {
             $offerMonthly = ($offer['frequency'] === 'yearly') 
                 ? $offer['price'] / 12 
                 : $offer['price'];
@@ -49,7 +50,29 @@ class Offer extends Model
                     'monthly_price' => round($offerMonthly, 2),
                     'monthly_savings' => round($monthlySaving, 2),
                     'yearly_savings' => round($yearlySaving, 2),
-                    'savings_percentage' => round(($monthlySaving / $currentMonthly) * 100, 1)
+                    'savings_percentage' => round(($monthlySaving / $currentMonthly) * 100, 1),
+                    'source' => 'internal'
+                ]);
+            }
+        }
+        
+        // Haal externe aanbiedingen op als API geconfigureerd
+        $externalOffers = $this->fetchExternalOffers($category, $currentMonthly);
+        foreach ($externalOffers as $offer) {
+            $offerMonthly = ($offer['frequency'] === 'yearly') 
+                ? $offer['price'] / 12 
+                : $offer['price'];
+            
+            if ($offerMonthly < $currentMonthly) {
+                $monthlySaving = $currentMonthly - $offerMonthly;
+                $yearlySaving = $monthlySaving * 12;
+                
+                $alternatives[] = array_merge($offer, [
+                    'monthly_price' => round($offerMonthly, 2),
+                    'monthly_savings' => round($monthlySaving, 2),
+                    'yearly_savings' => round($yearlySaving, 2),
+                    'savings_percentage' => round(($monthlySaving / $currentMonthly) * 100, 1),
+                    'source' => 'external'
                 ]);
             }
         }
@@ -60,6 +83,73 @@ class Offer extends Model
         });
         
         return $alternatives;
+    }
+    
+    /**
+     * Haal externe aanbiedingen op via API
+     */
+    private function fetchExternalOffers($category, $maxPrice)
+    {
+        $apiUrl = getenv('PRICE_API_URL');
+        $apiKey = getenv('PRICE_API_KEY');
+        
+        if (empty($apiUrl) || empty($apiKey)) {
+            return [];
+        }
+        
+        try {
+            // Bouw API URL met parameters
+            $url = $apiUrl . '?' . http_build_query([
+                'category' => $category,
+                'max_price' => $maxPrice,
+                'key' => $apiKey
+            ]);
+            
+            // Maak HTTP request
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'GET',
+                    'header' => 'Accept: application/json',
+                    'timeout' => 10
+                ]
+            ]);
+            
+            $response = file_get_contents($url, false, $context);
+            
+            if ($response === false) {
+                error_log("Price API request failed for category: $category");
+                return [];
+            }
+            
+            $data = json_decode($response, true);
+            
+            if (!isset($data['offers']) || !is_array($data['offers'])) {
+                error_log("Invalid API response format");
+                return [];
+            }
+            
+            // Normaliseer API response naar interne format
+            $offers = [];
+            foreach ($data['offers'] as $offer) {
+                $offers[] = [
+                    'id' => 'ext_' . ($offer['id'] ?? uniqid()),
+                    'provider' => $offer['provider'] ?? 'Onbekend',
+                    'plan_name' => $offer['plan_name'] ?? $offer['name'] ?? 'Standaard',
+                    'price' => (float) ($offer['price'] ?? 0),
+                    'frequency' => $offer['frequency'] ?? 'monthly',
+                    'category' => $category,
+                    'description' => $offer['description'] ?? '',
+                    'url' => $offer['url'] ?? '',
+                    'is_active' => 1
+                ];
+            }
+            
+            return $offers;
+            
+        } catch (\Exception $e) {
+            error_log("Error fetching external offers: " . $e->getMessage());
+            return [];
+        }
     }
     
     /**
